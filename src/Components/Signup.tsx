@@ -1,56 +1,28 @@
 
-import React, { ChangeEvent, FormEvent, useState } from 'react';
+import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
 import { Row, Col, Container, Form, Button } from 'react-bootstrap'
-import { relative } from 'path';
+import { useDispatch } from 'react-redux';
+import axios from 'axios'
+import config from './config'
 
 type TProduct = {
 	[key: string]: string
 }
-let schema =
-{
-	"type": "object",
-	"properties": {
-		"firstName": {
-			"type": "string"
-		},
-		"lastName": {
-			"type": "string"
-		},
-		"userName": {
-			"type": "string"
-		},
-		"email": {
-			"type": "string"
-		},
-		"contact": {
-			"type": "string"
-		},
-		"psw": {
-			"type": "string"
-		},
-		"confirm_psw": {
-			"type": "string"
-		},
-	},
-
-}
-
-
-
 const Signup: React.FC = (): JSX.Element => {
 	const history = useHistory();
+	const dispatch = useDispatch();	
+
 	const [count, setCount] = useState({
 		firstName: '',
 		lastName: '',
 		userName: '',
 		email: '',
 		contact: '',
-		psw: '',
-		confirm_psw: ''
+		password: '',
+		confirm_password: ''
 	} as TProduct);
-	const [errors, setErrors] = useState({ firstName: '' } as TProduct);
+	const [errors, setErrors] = useState({ firstName: '', lastName: '', userName: '', email: '', contact: '', password: '', confirm_password: '' } as TProduct);
 
 	const onHandleSubmit = (e: FormEvent) => {
 		e.preventDefault();
@@ -71,11 +43,18 @@ const Signup: React.FC = (): JSX.Element => {
 			localErrors = { ...localErrors, email: "Email should contain at least one dot" }
 		}
 
-		if (inputs.psw.length < 6) {
-			localErrors = { ...localErrors, psw: "Password should be at least 6 characters long" }
+		if (inputs.password.length < 6) {
+			localErrors = { ...localErrors, password: "Password should be at least 6 characters long" }
 		}
 		if (!Object.keys(localErrors).length) {
-			history.push('/')
+			const requestOptions: Object = {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				data: JSON.stringify(count),
+			};
+			axios.post(`${config.baseUrl}`, requestOptions).then((res: any) => {
+				console.log("Response are", res)
+			})
 		} else {
 			setErrors({ ...errors, ...localErrors })
 		}
@@ -84,7 +63,6 @@ const Signup: React.FC = (): JSX.Element => {
 
 
 	const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-		// const { target }: { target: object } = e
 		const { name, value }: { name: string, value: string } = e.target;
 		console.log(name, value, ">>>>>>>>");
 		setCount({
@@ -96,10 +74,6 @@ const Signup: React.FC = (): JSX.Element => {
 			[name]: ""
 		})
 	}
-
-
-
-
 	return (
 		<div>
 			<Row className="m-0">
@@ -166,9 +140,9 @@ const Signup: React.FC = (): JSX.Element => {
 										<Form.Group>
 											<Form.Label>Password</Form.Label>
 											<Form.Control
-												name="psw"
+												name="password"
 												type="password"
-												value={count.psw}
+												value={count.password}
 
 												onChange={handleChange}
 											/>
@@ -177,8 +151,8 @@ const Signup: React.FC = (): JSX.Element => {
 										<Form.Group>
 											<Form.Label>Confirm Password</Form.Label>
 											<Form.Control
-												name="confirm_psw"
-												value={count.confirm_psw}
+												name="confirm_password"
+												value={count.confirm_password}
 
 												type="password"
 												onChange={handleChange}

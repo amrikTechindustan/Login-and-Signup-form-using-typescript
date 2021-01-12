@@ -1,18 +1,57 @@
 
-import React, { FormEvent, useState } from 'react';
-import { Row, Col, Container, Form, Button } from 'react-bootstrap'
-import { relative } from 'path';
+import React, { useState, ChangeEvent,  FormEvent } from 'react';
+import { Row, Col, Form, Button } from 'react-bootstrap'
+
 import { useHistory } from 'react-router-dom'
+import config from './config'
+import axios from 'axios'
+type TProduct = {
+	[key: string]: string
+}
 const Login: React.FC = (): JSX.Element => {
-	const history = useHistory();
-	const toSignup = () => {
-		history.push('/signup')
+	const history=useHistory()
+
+	const [count, setCount] = useState({
+		email: '',
+		password: ''
+	} as TProduct);
+	const [errors, setErrors] = useState({ email: '', password: '' } as TProduct);
+
+	const onHandleSubmit = (e: FormEvent) => {
+		e.preventDefault()
+		console.log("gjmerlgjlaergkaelrgaekl;rg")
+		const inputs = { ...count }
+		let localErrors = {}
+
+		const requestOptions: Object = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			data: JSON.stringify(count),
+		};
+		axios.post(`${config.baseUrl2}`, requestOptions).then((res: any,) => {
+			console.log("Response are", res,localStorage.setItem('token',res.token))
+		})
+
+		setErrors({ ...errors, ...localErrors })
+
 	}
-	const toForgotpsw = () => {
+
+
+	const handleChange =(e: ChangeEvent<HTMLInputElement>) => {
+		const { name, value }: { name: string, value: string } = e.target;
+		console.log(name, value, ">>>>>>>>");
+		setCount({
+			...count,
+			[name]: value
+		})
+		setErrors({
+			...errors,
+			[name]: ""
+		})
+	}
+	const toForgotScreen=()=>{
 		history.push('/forgotpsw')
 	}
-
-
 	return (
 		<div>
 			<Row className="m-0">
@@ -27,12 +66,13 @@ const Login: React.FC = (): JSX.Element => {
 									<h2 className="title-1">Welcome!</h2>
 									<h1 className="title-2">Let's start together</h1>
 									<h3 className="pt-4 title-3"><span>Login</span> your account</h3>
-									<Form >
+									<Form onSubmit={onHandleSubmit}>
 										<Form.Group>
-											<Form.Label>Username</Form.Label>
+											<Form.Label>email</Form.Label>
 											<Form.Control
-												name="firstName"
-												required
+												name="email"
+												value={count.email}
+												onChange={handleChange}
 
 
 											/>
@@ -41,7 +81,9 @@ const Login: React.FC = (): JSX.Element => {
 											<Form.Label>PassWord</Form.Label>
 											<Form.Control
 												type="password"
-												name="lastName"
+												name="password"
+												value={count.password}
+												onChange={handleChange}
 
 											/>
 										</Form.Group>
@@ -50,7 +92,7 @@ const Login: React.FC = (): JSX.Element => {
 									</Form>
 									<br />
 									<div className="py-2">
-										<span className="text-center" onClick={() => toSignup()}>Create Account</span><span className="forgot_psw" onClick={() => toForgotpsw()}>Forgot Password?</span>
+										<span className="text-center">Create Account</span><span className="forgot_psw" onClick={toForgotScreen}>Forgot Password?</span>
 									</div>
 
 
